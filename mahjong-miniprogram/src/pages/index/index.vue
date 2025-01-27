@@ -44,6 +44,7 @@ export default {
             icon: 'none'
           })
         }
+      })
     },
     navigateToRoom() {
       uni.redirectTo({
