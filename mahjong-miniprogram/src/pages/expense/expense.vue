@@ -43,22 +43,22 @@ export default {
   },
   methods: {
     getPlayers() {
-      // 这里应该从全局状态或后端获取玩家列表
-      // 暂时使用模拟数据
-      this.players = [
-        {
-          id: '1',
-          nickName: '玩家1',
-          avatarUrl: '/static/avatar.png',
+      // 从本地存储获取房间信息
+      const roomInfo = uni.getStorageSync(`room_${this.roomId}`)
+      if (roomInfo && roomInfo.players) {
+        this.players = roomInfo.players.map(player => ({
+          ...player,
           inputScore: ''
-        },
-        {
-          id: '2',
-          nickName: '玩家2',
-          avatarUrl: '/static/avatar.png',
-          inputScore: ''
-        }
-      ]
+        }))
+      } else {
+        uni.showToast({
+          title: '获取玩家信息失败',
+          icon: 'none'
+        })
+        setTimeout(() => {
+          uni.navigateBack()
+        }, 1500)
+      }
     },
     submitScores() {
       // 验证输入
@@ -95,11 +95,43 @@ export default {
         totalScore: -totalScore // 当前用户的分数为负
       }
 
-      // 这里应该调用后端API更新分数
-      console.log('提交分数：', scoreData)
+      // 更新房间信息中的分数
+      const roomInfo = uni.getStorageSync(`room_${this.roomId}`)
+      if (roomInfo) {
+        const updatedPlayers = roomInfo.players.map(player => {
+          if (player.id === this.currentUserId) {
+            return {
+              ...player,
+              score: (player.score || 0) + scoreData.totalScore
+            }
+          }
+          const playerScore = scoreData.scores.find(s => s.userId === player.id)
+          if (playerScore) {
+            return {
+              ...player,
+              score: (player.score || 0) + playerScore.score
+            }
+          }
+          return player
+        })
 
-      // 返回上一页
-      uni.navigateBack()
+        // 保存更新后的房间信息
+        uni.setStorageSync(`room_${this.roomId}`, {
+          ...roomInfo,
+          players: updatedPlayers,
+          updateTime: Date.now()
+        })
+
+        uni.showToast({
+          title: '记分成功',
+          icon: 'success'
+        })
+
+        // 返回上一页
+        setTimeout(() => {
+          uni.navigateBack()
+        }, 1500)
+      }
     }
   }
 }

@@ -5,7 +5,7 @@
       <text class="title">麻将记分</text>
     </view>
     <view class="login-section">
-      <button class="login-btn" type="primary" open-type="getUserInfo" @getuserinfo="handleLogin">
+      <button class="login-btn" type="primary" @click="handleLogin">
         <text class="btn-text">微信一键登录</text>
       </button>
     </view>
@@ -27,17 +27,23 @@ export default {
     }
   },
   methods: {
-    handleLogin(e) {
-      if (e.detail.userInfo) {
-        this.userInfo = e.detail.userInfo
-        uni.setStorageSync('userInfo', e.detail.userInfo)
-        this.navigateToRoom()
-      } else {
-        uni.showToast({
-          title: '请授权登录',
-          icon: 'none'
-        })
-      }
+    handleLogin() {
+      uni.getUserProfile({
+        desc: '用于完善会员资料',
+        success: (res) => {
+          this.userInfo = res.userInfo
+          uni.setStorageSync('userInfo', {
+            ...res.userInfo,
+            id: Date.now().toString() // 临时使用时间戳作为用户ID
+          })
+          this.navigateToRoom()
+        },
+        fail: () => {
+          uni.showToast({
+            title: '请授权登录',
+            icon: 'none'
+          })
+        }
     },
     navigateToRoom() {
       uni.redirectTo({

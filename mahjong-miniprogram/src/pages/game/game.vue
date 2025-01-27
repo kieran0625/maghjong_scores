@@ -73,11 +73,40 @@ export default {
     createNewRoom() {
       // 创建新房间的逻辑
       this.roomId = Math.random().toString().slice(2, 8)
+      // 保存房间信息到本地存储
+      const roomInfo = {
+        id: this.roomId,
+        players: [],
+        createTime: Date.now()
+      }
+      uni.setStorageSync(`room_${this.roomId}`, roomInfo)
       this.generateQRCode()
       this.addCurrentPlayer()
     },
     joinRoom() {
       // 加入房间的逻辑
+      const roomInfo = uni.getStorageSync(`room_${this.roomId}`)
+      if (!roomInfo) {
+        uni.showToast({
+          title: '房间不存在',
+          icon: 'none'
+        })
+        setTimeout(() => {
+          uni.navigateBack()
+        }, 1500)
+        return
+      }
+      if (roomInfo.players.length >= 4) {
+        uni.showToast({
+          title: '房间已满',
+          icon: 'none'
+        })
+        setTimeout(() => {
+          uni.navigateBack()
+        }, 1500)
+        return
+      }
+      this.players = roomInfo.players
       this.generateQRCode()
       this.addCurrentPlayer()
     },
@@ -89,11 +118,24 @@ export default {
     addCurrentPlayer() {
       const userInfo = uni.getStorageSync('userInfo')
       if (userInfo) {
-        this.players.push({
-          ...userInfo,
-          score: 0,
-          isWinner: false
-        })
+        // 检查玩家是否已经在房间中
+        const isPlayerExist = this.players.some(player => player.id === userInfo.id)
+        if (!isPlayerExist) {
+          const newPlayer = {
+            ...userInfo,
+            score: 0,
+            isWinner: false,
+            joinTime: Date.now()
+          }
+          this.players.push(newPlayer)
+          // 更新房间信息
+          const roomInfo = {
+            id: this.roomId,
+            players: this.players,
+            updateTime: Date.now()
+          }
+          uni.setStorageSync(`room_${this.roomId}`, roomInfo)
+        }
       }
     },
     showSharePopup() {
