@@ -1,0 +1,33 @@
+{
+	"pages": [
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "麻将记分"
+			}
+		},
+		{
+			"path": "pages/room/room",
+			"style": {
+				"navigationBarTitleText": "房间选择"
+			}
+		},
+		{
+			"path": "pages/game/game",
+			"style": {
+				"navigationBarTitleText": "游戏房间"
+			}
+		},
+		{
+			"path": "pages/expense/expense",
+			"style": {
+				"navigationBarTitleText": "记分"
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8"
+	}
+}
